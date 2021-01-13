@@ -12,6 +12,22 @@
 
 ![sentinel流控规则在nacos的配置](./images/image-20210113152122689.png)
 
+当前支持的持久化配置：
+
+- 流控规则
+- 降级规则
+- 热点规则
+- 系统规则
+- 授权规则
+
+使用方式
+
+```shell
+cd sentinel-dashboard
+mvn clean package -Dmaven.test.skip=true
+java -jar sentinel-dashboard.jar
+```
+
 ### 客户端使用的方式
 
 1.导入依赖
@@ -22,7 +38,7 @@
     <groupId>com.alibaba.cloud</groupId>
     <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
 </dependency>
-        <!-- 整合sentinel持久化到nacos -->
+<!-- 整合sentinel持久化到nacos -->
 <dependency>
 <groupId>com.alibaba.csp</groupId>
 <artifactId>sentinel-datasource-nacos</artifactId>
