@@ -127,12 +127,12 @@ public final class NacosConfigUtil {
         return appName + postfix;
     }
 
-    public static MySQLEntity getDatasourceConfigFromNacos(ConfigService configService, String profile) throws NacosException {
+    public static MySQLEntity getDatasourceConfigFromNacos(ConfigService configService) throws NacosException {
         String config = configService.getConfig(
-                genDataId("sentinel-dashboard-", profile),
+                "sentinel-dashboard",
                 NacosConfigUtil.GROUP_ID,
                 3000
-                );
+        );
         return JSONUtils.parseObjectSingle(MySQLEntity.class, config);
     }
 }

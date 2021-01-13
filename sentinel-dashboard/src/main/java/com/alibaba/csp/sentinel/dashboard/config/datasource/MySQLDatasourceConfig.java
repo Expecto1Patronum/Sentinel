@@ -1,7 +1,6 @@
 package com.alibaba.csp.sentinel.dashboard.config.datasource;
 
 import com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfigUtil;
-import com.alibaba.csp.sentinel.dashboard.util.JSONUtils;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.zaxxer.hikari.HikariDataSource;
@@ -22,7 +21,7 @@ public class MySQLDatasourceConfig {
 
     @Bean
     public DataSource dataSource() throws NacosException {
-        MySQLEntity config = NacosConfigUtil.getDatasourceConfigFromNacos(configService, "dev");
+        MySQLEntity config = NacosConfigUtil.getDatasourceConfigFromNacos(configService);
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
         dataSource.setJdbcUrl(config.getUrl());
