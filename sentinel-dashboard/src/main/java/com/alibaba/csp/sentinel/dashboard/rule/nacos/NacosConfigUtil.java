@@ -15,6 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.nacos;
 
+import com.alibaba.csp.sentinel.dashboard.config.datasource.MySQLEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.util.JSONUtils;
 import com.alibaba.csp.sentinel.slots.block.Rule;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 public final class NacosConfigUtil {
 
     public static final String GROUP_ID = "SENTINEL_GROUP";
-    
+
     public static final String FLOW_DATA_ID_POSTFIX = "-flow-rules";
     public static final String DEGRADE_DATA_ID_POSTFIX = "-degrade-rules";
     public static final String SYSTEM_DATA_ID_POSTFIX = "-system-rules";
@@ -54,7 +55,8 @@ public final class NacosConfigUtil {
     public static final String SERVER_FLOW_CONFIG_DATA_ID_POSTFIX = "-cs-flow-config";
     public static final String SERVER_NAMESPACE_SET_DATA_ID_POSTFIX = "-cs-namespace-set";
 
-    private NacosConfigUtil() {}
+    private NacosConfigUtil() {
+    }
 
 
     /**
@@ -123,5 +125,14 @@ public final class NacosConfigUtil {
 
     private static String genDataId(String appName, String postfix) {
         return appName + postfix;
+    }
+
+    public static MySQLEntity getDatasourceConfigFromNacos(ConfigService configService, String profile) throws NacosException {
+        String config = configService.getConfig(
+                genDataId("sentinel-dashboard-", profile),
+                NacosConfigUtil.GROUP_ID,
+                3000
+                );
+        return JSONUtils.parseObjectSingle(MySQLEntity.class, config);
     }
 }

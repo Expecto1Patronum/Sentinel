@@ -90,3 +90,21 @@ spring:
       eager: true
 ```
 
+### 监控数据持久化
+
+目前持久化到MySQL数据库中，默认查询半个小时内的监控数据
+
+// TODO 1.页面上添加时间范围筛选框 2.使用更加效率的存储组件而非MySQL 3.是否需要定时清除历史的监控数据
+
+使用方式：（目前代码中写死了测试环境，后续可以根据打包时指定环境来读取对应的配置）
+
+- 在配置中心中新建一个配置 sentinel-dashboard-dev
+
+  Data ID:sentinel-dashboard-dev
+
+  Group: SENTINEL_GROUP
+
+  配置内容:{"url":"jdbc:mysql://数据库地址:数据库端口/sentinel_dashboard?useUnicode=true&characterEncoding=utf-8&useSSL=FALSE","username":"数据库用户名","password":"数据库用户密码"}
+
+- 启动项目
+

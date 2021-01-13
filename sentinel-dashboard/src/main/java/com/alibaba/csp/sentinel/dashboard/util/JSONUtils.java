@@ -31,4 +31,12 @@ public class JSONUtils {
             throw new IllegalArgumentException(e);
         }
     }
+
+    public static <T> T parseObjectSingle(Class<T> clazz, String string) {
+        try {
+            return new ObjectMapper().readValue(string, clazz);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 }

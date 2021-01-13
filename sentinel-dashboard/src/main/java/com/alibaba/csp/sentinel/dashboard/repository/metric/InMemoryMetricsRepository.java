@@ -20,11 +20,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.csp.sentinel.util.TimeUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -36,7 +32,7 @@ import java.util.stream.Collectors;
  * @author Carpenter Lee
  * @author Eric Zhao
  */
-@Component
+@Component("inMemoryMetricsRepository")
 public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity> {
 
     private static final long MAX_METRIC_LIVE_TIME_MS = 1000 * 60 * 5;
@@ -112,7 +108,7 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
     }
 
     @Override
-    public List<String> listResourcesOfApp(String app) {
+    public List<String> listResourcesOfApp(String app, long minTimeMs) {
         List<String> results = new ArrayList<>();
         if (StringUtil.isBlank(app)) {
             return results;
@@ -122,7 +118,7 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
         if (resourceMap == null) {
             return results;
         }
-        final long minTimeMs = System.currentTimeMillis() - 1000 * 60;
+//        final long minTimeMs = System.currentTimeMillis() - 1000 * 60;
         Map<String, MetricEntity> resourceCount = new ConcurrentHashMap<>(32);
 
         readWriteLock.readLock().lock();
