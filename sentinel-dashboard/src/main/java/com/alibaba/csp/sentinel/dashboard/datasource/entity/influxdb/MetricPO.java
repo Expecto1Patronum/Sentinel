@@ -1,50 +1,46 @@
-package com.alibaba.csp.sentinel.dashboard.datasource.entity.jpa;
+package com.alibaba.csp.sentinel.dashboard.datasource.entity.influxdb;
 
-import javax.persistence.*;
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * @author hbj
  * @date 2021/1/13 4:13 下午
  */
-@Entity
-@Table(name = "sentinel_metric")
+@Measurement(name = "sentinel_metric")
 public class MetricPO implements Serializable {
 
     private static final long serialVersionUID = -499670661853195313L;
 
+    @Column(name = "time")
+    private Instant time;
+
     /**
      * id，主键
      */
-    @Id
-    @GeneratedValue
     @Column(name = "id")
     private Long id;
 
     /**
      * 创建时间
      */
-    @Column(name = "gmt_create")
-    private Date gmtCreate;
+    @Column(name = "gmtCreate")
+    private Long gmtCreate;
 
     /**
      * 修改时间
      */
-    @Column(name = "gmt_modified")
-    private Date gmtModified;
+    @Column(name = "gmtModified")
+    private Long gmtModified;
 
     /**
      * 应用名称
      */
     @Column(name = "app")
     private String app;
-
-    /**
-     * 统计时间
-     */
-    @Column(name = "timestamp")
-    private Date timestamp;
 
     /**
      * 资源名称
@@ -55,25 +51,25 @@ public class MetricPO implements Serializable {
     /**
      * 通过qps
      */
-    @Column(name = "pass_qps")
+    @Column(name = "passQps")
     private Long passQps;
 
     /**
      * 成功qps
      */
-    @Column(name = "success_qps")
+    @Column(name = "successQps")
     private Long successQps;
 
     /**
      * 限流qps
      */
-    @Column(name = "block_qps")
+    @Column(name = "blockQps")
     private Long blockQps;
 
     /**
      * 发送异常的次数
      */
-    @Column(name = "exception_qps")
+    @Column(name = "exceptionQps")
     private Long exceptionQps;
 
     /**
@@ -85,13 +81,13 @@ public class MetricPO implements Serializable {
     /**
      * 本次聚合的总条数
      */
-    @Column(name = "_count")
+    @Column(name = "count")
     private Integer count;
 
     /**
      * 资源的hashCode
      */
-    @Column(name = "resource_code")
+    @Column(name = "resourceCode")
     private Integer resourceCode;
 
     public Long getId() {
@@ -102,19 +98,19 @@ public class MetricPO implements Serializable {
         this.id = id;
     }
 
-    public Date getGmtCreate() {
+    public Long getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Date gmtCreate) {
+    public void setGmtCreate(Long gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Date getGmtModified() {
+    public Long getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Date gmtModified) {
+    public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
     }
 
@@ -124,14 +120,6 @@ public class MetricPO implements Serializable {
 
     public void setApp(String app) {
         this.app = app;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getResource() {
@@ -196,5 +184,13 @@ public class MetricPO implements Serializable {
 
     public void setResourceCode(Integer resourceCode) {
         this.resourceCode = resourceCode;
+    }
+
+    public Instant getTime() {
+        return time;
+    }
+
+    public void setTime(Instant time) {
+        this.time = time;
     }
 }

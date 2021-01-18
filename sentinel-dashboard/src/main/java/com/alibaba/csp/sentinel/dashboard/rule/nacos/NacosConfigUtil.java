@@ -15,7 +15,6 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.nacos;
 
-import com.alibaba.csp.sentinel.dashboard.config.datasource.MySQLEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.util.JSONUtils;
 import com.alibaba.csp.sentinel.slots.block.Rule;
@@ -125,14 +124,5 @@ public final class NacosConfigUtil {
 
     private static String genDataId(String appName, String postfix) {
         return appName + postfix;
-    }
-
-    public static MySQLEntity getDatasourceConfigFromNacos(ConfigService configService) throws NacosException {
-        String config = configService.getConfig(
-                "sentinel-dashboard",
-                NacosConfigUtil.GROUP_ID,
-                3000
-        );
-        return JSONUtils.parseObjectSingle(MySQLEntity.class, config);
     }
 }
