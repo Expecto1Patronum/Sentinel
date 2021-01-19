@@ -20,13 +20,12 @@ import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleFinder;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleNameConstant;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,12 +44,9 @@ public class SystemController {
 
     @Autowired
     private RuleRepository<SystemRuleEntity, Long> repository;
+
     @Autowired
-    @Qualifier("systemRuleNacosProvider")
-    private DynamicRuleProvider<List<SystemRuleEntity>> ruleProvider;
-    @Autowired
-    @Qualifier("systemRuleNacosPublisher")
-    private DynamicRulePublisher<List<SystemRuleEntity>> rulePublisher;
+    private RuleFinder<SystemRuleEntity> ruleFinder;
 
     private <R> Result<R> checkBasicParams(String app, String ip, Integer port) {
         if (StringUtil.isEmpty(app)) {
@@ -77,7 +73,7 @@ public class SystemController {
             return checkResult;
         }
         try {
-            List<SystemRuleEntity> rules = ruleProvider.getRules(app);
+            List<SystemRuleEntity> rules = ruleFinder.findProvider(RuleNameConstant.SYSTEM).getRules(app);
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
@@ -242,6 +238,6 @@ public class SystemController {
 
     private void publishRules(String app) throws Exception {
         List<SystemRuleEntity> rules = repository.findAllByApp(app);
-        rulePublisher.publish(app, rules);
+        ruleFinder.findPublisher(RuleNameConstant.SYSTEM).publish(app, rules);
     }
 }

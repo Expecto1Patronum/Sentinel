@@ -76,10 +76,7 @@ public final class NacosConfigUtil {
         List<Rule> ruleForApp = rules.stream()
                 .map(rule -> {
                     RuleEntity rule1 = (RuleEntity) rule;
-                    System.out.println(rule1.getClass());
-                    Rule rule2 = rule1.toRule();
-                    System.out.println(rule2.getClass());
-                    return rule2;
+                    return rule1.toRule();
                 })
                 .collect(Collectors.toList());
 

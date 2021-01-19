@@ -20,6 +20,7 @@ import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfigUtil;
 import com.alibaba.nacos.api.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
  * @author hbj
  */
 @Component("degradeRuleNacosProvider")
+@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "nacos")
 public class DegradeRuleNacosProvider implements DynamicRuleProvider<List<DegradeRuleEntity>> {
     @Autowired
     private ConfigService configService;

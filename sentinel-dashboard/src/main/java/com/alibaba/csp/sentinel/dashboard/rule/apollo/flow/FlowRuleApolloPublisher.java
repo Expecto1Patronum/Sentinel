@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.dashboard.rule.nacos.flow;
+package com.alibaba.csp.sentinel.dashboard.rule.apollo.flow;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.rule.apollo.ApolloConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfigUtil;
-import com.alibaba.nacos.api.config.ConfigService;
+import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -26,20 +27,20 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * @author Eric Zhao
- * @since 1.4.0
+ * @author hantianwei@gmail.com
+ * @since 1.5.0
  */
-@Component("flowRuleNacosPublisher")
-@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "nacos")
-public class FlowRuleNacosPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
+@Component("flowRuleApolloPublisher")
+@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "apollo")
+public class FlowRuleApolloPublisher implements DynamicRulePublisher<List<FlowRuleEntity>> {
 
     @Autowired
-    private ConfigService configService;
+    private ApolloOpenApiClient apolloOpenApiClient;
 
     @Override
     public void publish(String app, List<FlowRuleEntity> rules) throws Exception {
-        NacosConfigUtil.setRuleStringToNacos(
-                this.configService,
+        ApolloConfigUtil.setRuleStringToApollo(
+                apolloOpenApiClient,
                 app,
                 NacosConfigUtil.FLOW_DATA_ID_POSTFIX,
                 rules

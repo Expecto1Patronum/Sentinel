@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.dashboard.rule.nacos;
+package com.alibaba.csp.sentinel.dashboard.rule.apollo;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.nacos.api.config.ConfigFactory;
-import com.alibaba.nacos.api.config.ConfigService;
+import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +26,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * @author Eric Zhao
- * @since 1.4.0
+ * @author hantianwei@gmail.com
+ * @since 1.5.0
  */
 @Configuration
-@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "nacos")
-public class NacosConfig {
+@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "apollo")
+public class ApolloConfig {
 
     @Bean
     public Converter<List<FlowRuleEntity>, String> flowRuleEntityEncoder() {
@@ -45,7 +44,12 @@ public class NacosConfig {
     }
 
     @Bean
-    public ConfigService nacosConfigService() throws Exception {
-        return ConfigFactory.createConfigService("localhost:8848");
+    public ApolloOpenApiClient apolloOpenApiClient() {
+        ApolloOpenApiClient client = ApolloOpenApiClient.newBuilder()
+                .withPortalUrl("http://localhost:10034")
+                .withToken("token")
+                .build();
+        return client;
+
     }
 }

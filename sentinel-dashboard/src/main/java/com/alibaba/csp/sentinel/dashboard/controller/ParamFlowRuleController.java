@@ -24,15 +24,14 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEn
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleFinder;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleNameConstant;
 import com.alibaba.csp.sentinel.dashboard.util.VersionUtils;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -51,11 +50,7 @@ public class ParamFlowRuleController {
     private final Logger logger = LoggerFactory.getLogger(ParamFlowRuleController.class);
 
     @Autowired
-    @Qualifier("paramFlowRuleNacosProvider")
-    private DynamicRuleProvider<List<ParamFlowRuleEntity>> ruleProvider;
-    @Autowired
-    @Qualifier("paramFlowRuleNacosPublisher")
-    private DynamicRulePublisher<List<ParamFlowRuleEntity>> rulePublisher;
+    private RuleFinder<ParamFlowRuleEntity> ruleFinder;
 
     @Autowired
     private AppManagement appManagement;
@@ -93,7 +88,7 @@ public class ParamFlowRuleController {
             return unsupportedVersion();
         }
         try {
-            List<ParamFlowRuleEntity> rules = ruleProvider.getRules(app);
+            List<ParamFlowRuleEntity> rules = ruleFinder.findProvider(RuleNameConstant.PARAM_FLOW).getRules(app);
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (ExecutionException ex) {
@@ -252,7 +247,7 @@ public class ParamFlowRuleController {
 
     private void publishRules(String app) throws Exception {
         List<ParamFlowRuleEntity> rules = repository.findAllByApp(app);
-        rulePublisher.publish(app, rules);
+        ruleFinder.findPublisher(RuleNameConstant.PARAM_FLOW).publish(app, rules);
     }
 
     private <R> Result<R> unsupportedVersion() {

@@ -20,15 +20,14 @@ import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemDegradeRuleStore;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleFinder;
+import com.alibaba.csp.sentinel.dashboard.rule.RuleNameConstant;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.degrade.circuitbreaker.CircuitBreakerStrategy;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -48,12 +47,9 @@ public class DegradeController {
 
     @Autowired
     private InMemDegradeRuleStore repository;
+
     @Autowired
-    @Qualifier("degradeRuleNacosProvider")
-    private DynamicRuleProvider<List<DegradeRuleEntity>> ruleProvider;
-    @Autowired
-    @Qualifier("degradeRuleNacosPublisher")
-    private DynamicRulePublisher<List<DegradeRuleEntity>> rulePublisher;
+    private RuleFinder<DegradeRuleEntity> ruleFinder;
 
     @GetMapping("/rules.json")
     @AuthAction(PrivilegeType.READ_RULE)
@@ -68,7 +64,7 @@ public class DegradeController {
             return Result.ofFail(-1, "port can't be null");
         }
         try {
-            List<DegradeRuleEntity> rules = repository.findAllByApp(app);
+            List<DegradeRuleEntity> rules = ruleFinder.findProvider(RuleNameConstant.DEGRADE).getRules(app);
             rules = repository.saveAll(rules);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
@@ -153,7 +149,7 @@ public class DegradeController {
 
     private void publishRules(String app) throws Exception {
         List<DegradeRuleEntity> rules = repository.findAllByApp(app);
-        rulePublisher.publish(app, rules);
+        ruleFinder.findPublisher(RuleNameConstant.DEGRADE).publish(app, rules);
     }
 
     private <R> Result<R> checkEntityInternal(DegradeRuleEntity entity) {

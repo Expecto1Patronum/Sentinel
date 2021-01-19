@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.dashboard.rule.nacos.degrade;
+package com.alibaba.csp.sentinel.dashboard.rule.apollo.authority;
 
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.AuthorityRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.apollo.ApolloConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfigUtil;
-import com.alibaba.nacos.api.config.ConfigService;
+import com.ctrip.framework.apollo.openapi.client.ApolloOpenApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -28,19 +29,20 @@ import java.util.List;
 /**
  * @author hbj
  */
-@Component("degradeRuleNacosPublisher")
-@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "nacos")
-public class DegradeRuleNacosPublisher implements DynamicRulePublisher<List<DegradeRuleEntity>> {
+@Component("authorityRuleApolloProvider")
+@ConditionalOnProperty(name = "enable.rule.persistence", havingValue = "apollo")
+public class AuthorityRuleApolloProvider implements DynamicRuleProvider<List<AuthorityRuleEntity>> {
+
     @Autowired
-    private ConfigService configService;
+    private ApolloOpenApiClient apolloOpenApiClient;
 
     @Override
-    public void publish(String app, List<DegradeRuleEntity> rules) throws Exception {
-        NacosConfigUtil.setRuleStringToNacos(
-                this.configService,
-                app,
-                NacosConfigUtil.DEGRADE_DATA_ID_POSTFIX,
-                rules
+    public List<AuthorityRuleEntity> getRules(String appName) throws Exception {
+        return ApolloConfigUtil.getRuleEntitiesFromApollo(
+                this.apolloOpenApiClient,
+                appName,
+                NacosConfigUtil.AUTHORITY_DATA_ID_POSTFIX,
+                AuthorityRuleEntity.class
         );
     }
 }
