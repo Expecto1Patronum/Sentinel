@@ -43,6 +43,10 @@ public final class ApolloConfigUtil {
     private ApolloConfigUtil() {
     }
 
+    public static String getFlowDataId(String appName) {
+        return String.format("%s%s", appName, FLOW_DATA_ID_POSTFIX);
+    }
+
     public static String genDataId(String appName, String postfix) {
         return String.format("%s%s", appName, postfix);
     }
