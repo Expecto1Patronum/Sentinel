@@ -1,18 +1,31 @@
 <img src="https://user-images.githubusercontent.com/9434884/43697219-3cb4ef3a-9975-11e8-9a9c-73f4f537442d.png" alt="Sentinel Logo" width="50%">
 
-### 规则持久化的方式
+### 规则持久化控制台改造方式
 
 此处使用的是推模式，使用到了一个数据源（此处使用的是Nacos配置中心数据源）
 
 其工作原理图：
 
-![Sentinel规则持久化推模式](https://user-images.githubusercontent.com/9434884/53381986-a0b73f00-39ad-11e9-90cf-b49158ae4b6f.png)
+![Sentinel规则持久化推模式](./doc/image/sentinel-persistence-push.png)
 
-用户在Dashboard上进行流控规则修改后，Dashboard会将修改后的数据推送到Nacos配置中心中，Nacos配置中心会将修改的流控规则推送给用户
+#### 简单的介绍推模式的原理
 
-![sentinel流控规则在nacos的配置](./images/image-20210113152122689.png)
+- Sentinel控制台（规则中心）：
+  - 将更新的规则推送至Nacos或者其它远程配置中心（Nacos，ZK，Apollo，Redis）
+  - 控制台查询配置中心配置的规则并更新到本地内存中
+- Sentinel客户端：
+  - 客户端实现 ReadableDataSource 监听并更新配置规则
 
-当前支持的持久化配置：
+#### 推模式与拉模式的比较
+
+- 推模式：客户端通过监听的方式，时刻监听配置中心的变化 （例如基于Nacos的数据源）
+  - 优点：保证了实时性
+  - 缺点：依赖第三方的配置中心，增加开发难度
+- 拉模式：客户端向规则中心定期拉取配置的规则（例如基于文件的数据源）
+  - 优点：开发简单，无第三方的依赖
+  - 缺点：实时性不高
+
+#### 当前支持的持久化配置
 
 - 流控规则
 - 降级规则
@@ -20,7 +33,41 @@
 - 系统规则
 - 授权规则
 
-使用方式
+**实现的效果**
+
+![sentinel流控规则在nacos的配置](doc/image/sentinel-nacos-config.png)
+
+#### 持久化的思路
+
+控制台持久化的主要工作内容是将规则的推送方式和读取方式从本地内存改为Nacos等配置中心
+
+- 修改pom
+
+  ```xml
+  <!-- for Nacos rule publisher sample -->
+  <dependency>
+    <groupId>com.alibaba.csp</groupId>
+    <artifactId>sentinel-datasource-nacos</artifactId>
+    <!-- <scope>test</scope> 将此行注释掉 -->
+  </dependency>
+  ```
+
+- 修改对应Controller流控规则获取方式（以流控规则为例）
+
+  ```java
+  @Autowired
+  @Qualifier("flowRuleNacosProvider")
+  private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
+  @Autowired
+  @Qualifier("flowRuleNacosPublisher")
+  private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
+  ```
+
+- 开发对应的Provider和Publisher
+
+  参考样例：com/alibaba/csp/sentinel/dashboard/rule/nacos
+
+#### 使用方式
 
 ```shell
 cd sentinel-dashboard
@@ -28,9 +75,9 @@ mvn clean package -Dmaven.test.skip=true
 java -jar sentinel-dashboard.jar
 ```
 
-### 客户端使用的方式
+### 规则持久化客户端使用方式
 
-1.导入依赖
+- 导入依赖
 
 ```xml
 <!-- sentinel 整合成功会暴露/actuator/sentinel端点 -->
@@ -45,7 +92,8 @@ java -jar sentinel-dashboard.jar
 </dependency>
 ```
 
-2.修改配置
+- 修改配置
+
 
 ```yaml
 spring:
@@ -92,19 +140,32 @@ spring:
 
 ### 监控数据持久化
 
-目前持久化到MySQL数据库中，默认查询半个小时内的监控数据
+目前持久化到InfluxDB数据库中，默认查询半个小时内的监控数据（mysql版见 feature/persistence_mysql）
 
-// TODO 1.页面上添加时间范围筛选框 2.使用更加效率的存储组件而非MySQL 3.是否需要定时清除历史的监控数据
+#### 持久化的思路
 
-使用方式：（目前代码中写死了测试环境，后续可以根据打包时指定环境来读取对应的配置）
+- 新增依赖
 
-- 在配置中心中新建一个配置 sentinel-dashboard-dev
+  ```xml
+  <!-- influxdb -->
+  <dependency>
+      <groupId>org.influxdb</groupId>
+      <artifactId>influxdb-java</artifactId>
+      <version>2.21</version>
+  </dependency>
+  ```
 
-  Data ID:sentinel-dashboard-dev
+- 修改监控数据Controller查询的数据源
 
-  Group: SENTINEL_GROUP
+  ```java
+  @Autowired
+  @Qualifier("influxDBMetricsRepository")
+  private MetricsRepository<MetricEntity> metricStore;
+  ```
 
-  配置内容:{"url":"jdbc:mysql://数据库地址:数据库端口/sentinel_dashboard?useUnicode=true&characterEncoding=utf-8&useSSL=FALSE","username":"数据库用户名","password":"数据库用户密码"}
+- 实现MetricsRepository接口进行增删改查开发
 
-- 启动项目
+  ```java
+  com.alibaba.csp.sentinel.dashboard.repository.metric.InfluxDBMetricsRepository
+  ```
 
